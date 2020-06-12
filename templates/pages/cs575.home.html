@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OS Algorithm Scheduler Simulation</title>
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css"/>
+    
+    
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+     
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+
+    <style type="text/css">
+            * {
+         font-family: Helvetica;
+        }
+
+        h1{
+        	font-size: 8px;
+        	text-align: center;
+        }
+
+        .row:after {
+		  content: "";
+		  display: table;
+		  clear: both;
+		   position: relative;
+		}
+
+        .column {
+		  float: left;
+		  align-content: center;
+		  width: 49%;
+		  padding-left:10px;
+		  margin-left: 2px;
+		  position: relative;
+		}
+
+        .table-responsive {
+            max-width:100%;
+        }
+
+        #slider-number_of_processes {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #number_of_processes {
+             width: 25px;
+        }
+
+        #slider-priority_range {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+		table { 
+		  width: 100%;
+		  text-align: left;
+		  background-color: lemonchiffon;
+		  border-collapse: collapse; 
+		  }
+		th { 
+		  background-color: goldenrod;
+		  color: black; 
+		  }
+		td, th { 
+		  padding: 10px;
+		  border: 1px solid goldenrod; 
+		  }
+		.rcorners2 {
+			  border-radius: 5px;
+			  border: 2px solid #73AD21;
+			}
+    </style>
+
+</head>
+<body class="jumbotron">
+<div align="center" >
+    <form role="form" id="form-buscar">
+        <div class="row">
+            <div class="column" >
+                <h3>Simulation Controls</h3>
+                <label>Number Of Processes: </label><input id="number_of_processes" type="text" name="number_of_processes" size="4" value="{{labels|length}}" class="rcorners2"/>
+                <br><br>
+                <label>Time Quantum: </label><input id="time_quantum"  type="text" name="time_quantum" size="2" value="5" class="rcorners2"/>
+                <br><br>
+                <button class="btn btn-success" type="submit">Start Simulation</button>
+            </div>
+			<div class="column" id="input-table">
+    			<h3><u>Random input table</u></h3>
+			    <table>
+			        <tr>
+			            <th>pid</th>
+			            {% for p in labels %}
+			            <td>{{ p }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>priority</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['priority'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>arrival_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['arrival_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>burst_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['burst_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			    </table>
+			</div>
+		</div>
+		<div class="row">		
+			<div class="column" id="fcfs">
+			    <h3><u>First Come First Serve</u></h3>
+			    <table>
+			        <tr>
+			            <th>pid</th>
+			            {% for p in labels %}
+			            <td>{{ p }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>turnaround_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['turnaround_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>finish_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['finish_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>start_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['start_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>waiting_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['First Come First Serve'][p]['waiting_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			    </table>
+			    <br/>
+			    <label>Average-waiting-Time:{{ results['First Come First Serve']['average_waiting_time'] }}</label>
+			    <br/>
+			    <label>Average-Turn-Around-Time:{{ results['First Come First Serve']['average_turnaround_time'] }}</label>
+			</div>
+			<div class="column" id="rr" >
+			    <h3><u>Round Robin</u></h3>
+			    <table>
+			        <tr>
+			            <th>pid</th>
+			            {% for p in labels %}
+			            <td>{{ p }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>turnaround_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Round Robin'][p]['turnaround_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>finish_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Round Robin'][p]['finish_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>start_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Round Robin'][p]['start_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>waiting_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Round Robin'][p]['waiting_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			    </table>
+			    <br/>
+			    <label>Average-waiting-Time:{{ results['Round Robin']['average_waiting_time'] }}</label>
+			    <br/>
+			    <label>Average-Turn-Around-Time:{{ results['Round Robin']['average_turnaround_time'] }}</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="column" >
+				    <h3><u>Shortest Job First</u></h3>
+				    <table>
+				        <tr>
+				            <th>pid</th>
+				            {% for p in labels %}
+				            <td>{{ p }}</td>
+				            {% endfor %}
+				        </tr>
+				        <tr>
+				            <th>turnaround_time</th>
+				            {% for p in labels %}
+				            <td>{{ results['Shortest Job First'][p]['turnaround_time'] }}</td>
+				            {% endfor %}
+				        </tr>
+				        <tr>
+				            <th>finish_time</th>
+				            {% for p in labels %}
+				            <td>{{ results['Shortest Job First'][p]['finish_time'] }}</td>
+				            {% endfor %}
+				        </tr>
+				        <tr>
+				            <th>start_time</th>
+				            {% for p in labels %}
+				            <td>{{ results['Shortest Job First'][p]['start_time'] }}</td>
+				            {% endfor %}
+				        </tr>
+				        <tr>
+				            <th>waiting_time</th>
+				            {% for p in labels %}
+				            <td>{{ results['Shortest Job First'][p]['waiting_time'] }}</td>
+				            {% endfor %}
+				        </tr>
+				    </table>
+			    <br/>
+			    <label>Average-waiting-Time:{{ results['Shortest Job First']['average_waiting_time'] }}</label>
+			    <br/>
+			    <label>Average-Turn-Around-Time:{{ results['Shortest Job First']['average_turnaround_time'] }}</label>
+			</div>
+			<div class="column" id="srtf">
+			    <h3><u>Shortest Remaining Time First</u></h3>
+			    <table>
+			        <tr>
+			            <th>pid</th>
+			            {% for p in labels %}
+			            <td>{{ p }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>turnaround_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Shortest Remaining Time First'][p]['turnaround_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>finish_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Shortest Remaining Time First'][p]['finish_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>start_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Shortest Remaining Time First'][p]['start_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>waiting_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Shortest Remaining Time First'][p]['waiting_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			    </table>
+			    <br/>
+			    <label>Average-waiting-Time:{{ results['Shortest Remaining Time First']['average_waiting_time'] }}</label>
+			    <br/>
+			    <label>Average-Turn-Around-Time:{{ results['Shortest Remaining Time First']['average_turnaround_time'] }}</label>
+			</div>
+		</div>
+
+			<div class="column" id="ps">
+			    <h3><u>Priority Scheduling</u></h3>
+			    <table>
+			        <tr>
+			            <th>pid</th>
+			            {% for p in labels %}
+			            <td>{{ p }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>turnaround_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Priority Scheduling'][p]['turnaround_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>finish_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Priority Scheduling'][p]['finish_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>start_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Priority Scheduling'][p]['start_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			        <tr>
+			            <th>waiting_time</th>
+			            {% for p in labels %}
+			            <td>{{ results['Priority Scheduling'][p]['waiting_time'] }}</td>
+			            {% endfor %}
+			        </tr>
+			    </table>
+			    <br/>
+			    <label>Average-waiting-Time:{{ results['Priority Scheduling']['average_waiting_time'] }}</label>
+			    <br/>
+			    <label>Average-Turn-Around-Time:{{ results['Priority Scheduling']['average_turnaround_time'] }}</label>
+			</div>
+		</div>
+	</form>
+</div>
+
+
+<script type="text/javascript">
+// START WAITING TIME CHART JS SECTION
+
+document.getElementById("show_fcfs").addEventListener("click", showFCFS);
+document.getElementById("show_sjf").addEventListener("click", showSJF);
+document.getElementById("show_srtf").addEventListener("click", showSRTF);
+document.getElementById("show_rr").addEventListener("click", showRR);
+document.getElementById("show_ps").addEventListener("click", showPS);
+
+function showFCFS() {
+    document.getElementById("fcfs").style.display='block';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
+
+function showSJF() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='block';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
+function showSRTF() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='block';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
+function showRR() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='block';
+    document.getElementById("ps").style.display='none';
+    }
+function showPS() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='block';
+    }
+
+showFCFS()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
